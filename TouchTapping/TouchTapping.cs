@@ -3,16 +3,16 @@ using System.Linq;
 using System.Numerics;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
-using OpenTabletDriver.Plugin.DependencyInjection;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Tablet;
+using OpenTabletDriver.Plugin.DependencyInjection;
 using OpenTabletDriver.Plugin.Tablet.Touch;
 using OpenTabletDriver.Plugin.Platform.Keyboard;
 
 namespace TouchTapping
 {
     [PluginName("Touch Tapping")]
-    public class TouchTappingPlugin : IPositionedPipelineElement<IDeviceReport>
+    public class TouchTappingPlugin(IVirtualKeyboard virtualKeyboard) : IPositionedPipelineElement<IDeviceReport>, IPropertiesInitialized
     {
         [Property("Key 1"), DefaultPropertyValue("Z")]
         public string K1 { set; get; }
@@ -23,8 +23,6 @@ namespace TouchTapping
         public bool ForceAlternate { set; get; }
 
         public PipelinePosition Position => PipelinePosition.PreTransform;
-
-        public TouchTappingPlugin() : base() { }
 
         public event Action<IDeviceReport> Emit;
 
@@ -75,8 +73,7 @@ namespace TouchTapping
             ActiveBinds[kn] = null;
         }
 
-        [OnDependencyLoad]
-        public void SetBinds()
+        public void PropertiesInitialized()
         {
             if (!VirtualKeyboard.SupportedKeys.Contains(K1))
             {
@@ -103,8 +100,7 @@ namespace TouchTapping
 
         Keybind[] ActiveBinds = new Keybind[2];
 
-        [Resolved]
-        public IVirtualKeyboard VirtualKeyboard;
+        public IVirtualKeyboard VirtualKeyboard = virtualKeyboard;
     }
 
     public class Keybind

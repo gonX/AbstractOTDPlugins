@@ -9,7 +9,15 @@ namespace RadialFollow
     [PluginName("AbstractQbit's Radial Follow Smoothing (Tablet coordinates)")]
     public class RadialFollowSmoothingTabletSpace : IPositionedPipelineElement<IDeviceReport>
     {
-        public RadialFollowSmoothingTabletSpace() : base() { }
+        public RadialFollowSmoothingTabletSpace(TabletReference tabletreference) : base()
+        {
+            var digitizer = tabletreference.Properties.Specifications.Digitizer;
+            mmScale = new Vector2
+            {
+                X = digitizer.Width / digitizer.MaxX,
+                Y = digitizer.Height / digitizer.MaxY
+            };
+        }
         public PipelinePosition Position => PipelinePosition.PreTransform;
 
         [Property("Outer Radius"), DefaultPropertyValue(1.0d), Unit("mm"), ToolTip
@@ -92,19 +100,6 @@ namespace RadialFollow
 
         RadialFollowCore radialCore = new RadialFollowCore();
 
-        [TabletReference]
-        public TabletReference TabletReference
-        {
-            set
-            {
-                var digitizer = value.Properties.Specifications.Digitizer;
-                mmScale = new Vector2
-                {
-                    X = digitizer.Width / digitizer.MaxX,
-                    Y = digitizer.Height / digitizer.MaxY
-                };
-            }
-        }
         private Vector2 mmScale = Vector2.One;
     }
 }
